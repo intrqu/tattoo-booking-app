@@ -49,7 +49,17 @@ function App() {
 		status: "Booked",
 		notes: "",
 	});
-
+	const [showClientModal, setShowClientModal] = useState(false);
+	const [newClient, setNewClient] = useState({
+		name: "",
+		email: "",
+		phone: "",
+		instagram: "",
+		notes: "",
+		status: "Inquiry",
+		upcoming: "",
+		lastVisit: "Never",
+	});
 	useEffect(() => {
 		fetchClients();
 	}, []);
@@ -107,28 +117,6 @@ function App() {
 	const selectedClient =
 		clients.find((client) => client.id === selectedClientId) ?? null;
 
-	async function addTestClient() {
-		const { error } = await supabase.from("clients").insert([
-			{
-				name: "Test Client",
-				email: "test@email.com",
-				phone: "123-456-7890",
-				instagram: "@testclient",
-				notes: "New test client from app",
-				status: "Inquiry",
-				upcoming: "Not booked yet",
-				lastVisit: "Never",
-			},
-		]);
-
-		if (error) {
-			console.error("error adding client:", error);
-			return;
-		}
-
-		await fetchClients();
-	}
-
 	return (
 		<div className="min-h-screen bg-zinc-950 text-white">
 			<div className="mx-auto grid min-h-screen max-w-[1600px] gap-5 p-5 lg:grid-cols-[280px_minmax(0,1fr)]">
@@ -158,11 +146,11 @@ function App() {
 							</button>
 
 							<button
-								onClick={addTestClient}
+								onClick={() => setShowClientModal(true)}
 								className="inline-flex items-center gap-2 rounded-2xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-medium text-white hover:bg-zinc-800"
 							>
 								<Plus className="h-4 w-4" />
-								Add test client
+								Add client
 							</button>
 							<button
 								onClick={() => setShowAppointmentModal(true)}
@@ -677,6 +665,136 @@ function App() {
 										className="flex-1 rounded-xl bg-white p-3 font-semibold text-black"
 									>
 										Save
+									</button>
+								</div>
+							</div>
+						</div>
+					)}
+
+					{showClientModal && (
+						<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+							<div className="w-full max-w-lg rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
+								<h2 className="text-xl font-semibold text-white">
+									Add Client
+								</h2>
+
+								<div className="mt-4 space-y-3">
+									<input
+										placeholder="Name"
+										value={newClient.name}
+										onChange={(e) =>
+											setNewClient({
+												...newClient,
+												name: e.target.value,
+											})
+										}
+										className="w-full rounded-xl bg-zinc-900 p-3 text-white"
+									/>
+
+									<input
+										placeholder="Email"
+										value={newClient.email}
+										onChange={(e) =>
+											setNewClient({
+												...newClient,
+												email: e.target.value,
+											})
+										}
+										className="w-full rounded-xl bg-zinc-900 p-3 text-white"
+									/>
+
+									<input
+										placeholder="Phone"
+										value={newClient.phone}
+										onChange={(e) =>
+											setNewClient({
+												...newClient,
+												phone: e.target.value,
+											})
+										}
+										className="w-full rounded-xl bg-zinc-900 p-3 text-white"
+									/>
+
+									<input
+										placeholder="Instagram"
+										value={newClient.instagram}
+										onChange={(e) =>
+											setNewClient({
+												...newClient,
+												instagram: e.target.value,
+											})
+										}
+										className="w-full rounded-xl bg-zinc-900 p-3 text-white"
+									/>
+
+									<textarea
+										placeholder="Notes"
+										value={newClient.notes}
+										onChange={(e) =>
+											setNewClient({
+												...newClient,
+												notes: e.target.value,
+											})
+										}
+										className="w-full rounded-xl bg-zinc-900 p-3 text-white"
+									/>
+								</div>
+
+								<div className="mt-5 flex gap-3">
+									<button
+										onClick={() =>
+											setShowClientModal(false)
+										}
+										className="flex-1 rounded-xl border border-zinc-700 p-3 text-zinc-300"
+									>
+										Cancel
+									</button>
+
+									<button
+										onClick={async () => {
+											if (!newClient.name.trim()) return;
+
+											const { error } = await supabase
+												.from("clients")
+												.insert([
+													{
+														name: newClient.name,
+														email: newClient.email,
+														phone: newClient.phone,
+														instagram:
+															newClient.instagram,
+														notes: newClient.notes,
+														status: newClient.status,
+														upcoming:
+															newClient.upcoming,
+														lastVisit:
+															newClient.lastVisit,
+													},
+												]);
+
+											if (error) {
+												console.error(
+													"error adding client:",
+													error,
+												);
+											} else {
+												setShowClientModal(false);
+												setNewClient({
+													name: "",
+													email: "",
+													phone: "",
+													instagram: "",
+													notes: "",
+													status: "Inquiry",
+													upcoming: "",
+													lastVisit: "Never",
+												});
+												fetchClients();
+											}
+										}}
+										className="flex-1 rounded-xl bg-white p-3 font-semibold text-black"
+									>
+										Save client
 									</button>
 								</div>
 							</div>
